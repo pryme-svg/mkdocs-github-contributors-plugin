@@ -2,6 +2,14 @@
 
 Plugin for [MkDocs](https://mkdocs.org). Inserts a list of GitHub contributors.
 
+## Installation
+
+```
+pip install mkdocs-github-contributors-plugin
+```
+
+## Configuration
+
 ```yaml
 plugins:
   - github-contributors:
@@ -11,7 +19,5 @@ plugins:
       clientId: <clientId>
       clientSecret: <clientSecret>
 ```
-
-## Options
 
 - `repository`: should be in the form `${owner}/${repo}`
