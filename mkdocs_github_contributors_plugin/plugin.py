@@ -7,28 +7,52 @@ from mkdocs.plugins import BasePlugin
 from mkdocs.config import config_options
 
 item_formatting = """\
-<div class=contributors-github>
-    <div class="contributor-github-item">
-        <a href="https://github.com/{username}"> title="{username}">
-            <img src="{avatar_url}">
-        </a>
-    </div>
-</div>\n"""
+<td>
+    <a href="https://github.com/{username}" title="{username}">
+        <img src="{avatar_url}">
+        <br />
+        <b>{username}</b>
+    </a>
+</td>\n"""
 
 class GitHubContributorsPlugin(BasePlugin):
 
     config_scheme = (
         ('repository', config_options.Type(str, default='')),
-        ('token', config_options.Type(str, default='')),
+        ('clientId', config_options.Type(str, default='')),
+        ('clientSecret', config_options.Type(str, default='')),
     )
-    matcher = re.compile("{{ github.contributors }}")
 
     def __init__(self):
-        self._data = requests.get("https://api.github.com/repos/{}/contributors".format(self.config['repository'])).json()
         self.formatted_contributors = ""
-        for contributor in self._data:
-            self.formatted_contributors += item_formatting.format(username=contributor['login'], avatar_url=contributor['avatar_url']
+
+    def _get_data(self):
+        if self.config['clientId'] != "" and self.config['clientSecret'] != "":
+            self._data = requests.get("https://api.github.com/repos/{}/contributors".format(self.config['repository']), auth=(self.config['clientId'], self.config['clientSecret'])).json()
+        else:
+            self._data = requests.get("https://api.github.com/repos/{}/contributors".format(self.config['repository'])).json()
+        self.formatted_contributors = "<table>\n"
+        i = 0
+        inRow = False
+        while i < len(self._data):
+            if i%4 == 0 and inRow == False:
+                self.formatted_contributors += "<tr>\n"
+                inRow = True
+            elif i%4 == 0 and inRow == True:
+                self.formatted_contributors += "</tr>\n"
+                inRow = False
+            contributor = self._data[i]
+            self.formatted_contributors += item_formatting.format(username=contributor['login'], avatar_url=contributor['avatar_url'])
+            i += 1
+        if inRow == True:
+            self.formatted_contributors += "</tr>\n"
+        self.formatted_contributors += "</table>"
 
 
     def on_page_markdown(self, markdown, page=None, config=None, **kwargs):
-        return markdown.replace("{{ github.contributors }}", self.formatted_contributors)
+        if "{{ github.contributors }}" in markdown:
+            if self.formatted_contributors == "":
+                self._get_data()
+            return markdown.replace("{{ github.contributors }}", self.formatted_contributors)
+        else:
+            return markdown
