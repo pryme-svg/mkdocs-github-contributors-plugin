@@ -7,8 +7,8 @@ from mkdocs.plugins import BasePlugin
 from mkdocs.config import config_options
 
 item_formatting = """\
-<td>
-    <a href="https://github.com/{username}" title="{username}">
+<td class=\"contributor-item\">
+    <a href="https://github.com/{username}" title="{username}" class=\"contributor\">
         <img src="{avatar_url}">
         <br />
         <b>{username}</b>
@@ -31,7 +31,7 @@ class GitHubContributorsPlugin(BasePlugin):
             self._data = requests.get("https://api.github.com/repos/{}/contributors".format(self.config['repository']), auth=(self.config['clientId'], self.config['clientSecret'])).json()
         else:
             self._data = requests.get("https://api.github.com/repos/{}/contributors".format(self.config['repository'])).json()
-        self.formatted_contributors = "<table>\n"
+        self.formatted_contributors = "<table class=\"contributors-github\">\n"
         i = 0
         inRow = False
         while i < len(self._data):
