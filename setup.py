@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='mkdocs-github-contributors-plugin',
-    version='0.1.3',
+    version='0.1.4',
     packages=find_packages(),
     url="https://github.com/pryme-svg/mkdocs-github-contributors-plugin",
     license="GPL3",

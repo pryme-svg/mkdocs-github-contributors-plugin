@@ -4,6 +4,7 @@ import requests
 import re
 
 from mkdocs.plugins import BasePlugin
+from mkdocs.exceptions import PluginError
 from mkdocs.config import config_options
 
 item_formatting = """\
@@ -21,16 +22,37 @@ class GitHubContributorsPlugin(BasePlugin):
         ('repository', config_options.Type(str, default='')),
         ('clientId', config_options.Type(str, default='')),
         ('clientSecret', config_options.Type(str, default='')),
+        ('contributorsFile', config_options.Type(str, default='')),
     )
 
     def __init__(self):
         self.formatted_contributors = ""
 
+    def _get_custom_contributors(self):
+        with open(self.config['contributorsFile'], 'r') as fin:
+            for line in fin:
+                fline = line.split('/')
+                login = fline[0]
+                userId = fline[1]
+                self._data.append({
+                    'login': login,
+                    'avatar_url': 'https://avatars.githubusercontent.com/u/{}'.format(userId)
+                })
+            
+
     def _get_data(self):
-        if self.config['clientId'] != "" and self.config['clientSecret'] != "":
-            self._data = requests.get("https://api.github.com/repos/{}/contributors".format(self.config['repository']), auth=(self.config['clientId'], self.config['clientSecret'])).json()
-        else:
-            self._data = requests.get("https://api.github.com/repos/{}/contributors".format(self.config['repository'])).json()
+        try:
+            if self.config['clientId'] != "" and self.config['clientSecret'] != "":
+                response = requests.get("https://api.github.com/repos/{}/contributors".format(self.config['repository']), auth=(self.config['clientId'], self.config['clientSecret']))
+            else:
+                response = requests.get("https://api.github.com/repos/{}/contributors".format(self.config['repository']))
+            response.raise_for_status()
+        except requests.exceptions.RequestException as e:
+            raise PluginError(str(e))
+
+        self._data = response.json()
+        if self.config['contributorsFile'] != '':
+            self._get_custom_contributors()
         self.formatted_contributors = "<table class=\"contributors-github\">\n"
         i = 0
         inRow = False

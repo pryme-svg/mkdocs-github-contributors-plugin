@@ -21,3 +21,5 @@ plugins:
 ```
 
 - `repository`: should be in the form `${owner}/${repo}`
+
+- `clientId` and `clientSecret` are not required, but increase the GitHub API ratelimit
