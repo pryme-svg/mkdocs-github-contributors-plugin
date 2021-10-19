@@ -9,7 +9,7 @@ from mkdocs.config import config_options
 
 item_formatting = """\
 <td class=\"contributor-item\">
-    <a href="https://github.com/{username}" title="{username}" class=\"contributor\">
+    <a href="https://github.com/{username}" title="{username}" class=\"contributor\" target="_blank">
         <img src="{avatar_url}">
         <br />
         <b>{username}</b>
