@@ -23,6 +23,7 @@ class GitHubContributorsPlugin(BasePlugin):
         ('clientId', config_options.Type(str, default='')),
         ('clientSecret', config_options.Type(str, default='')),
         ('contributorsFile', config_options.Type(str, default='')),
+        ('excludedIds', config_options.Type(list, default=[])),
     )
 
     def __init__(self):
@@ -51,6 +52,13 @@ class GitHubContributorsPlugin(BasePlugin):
             raise PluginError(str(e))
 
         self._data = response.json()
+
+        # remove excluded contributors
+        if self.config['excludedIds'] != []:
+            for contributor in self._data:
+                if contributor['id'] in self.config['excludedIds']:
+                    self._data.remove(contributor)
+
         if self.config['contributorsFile'] != '':
             self._get_custom_contributors()
         self.formatted_contributors = "<table class=\"contributors-github\">\n"

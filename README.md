@@ -14,6 +14,9 @@ pip install mkdocs-github-contributors-plugin
 plugins:
   - github-contributors:
       repository: <repo>
+      contributorsFile: <contributorsFile>
+      excludedIds:
+        - <id>
 
       # optional
       clientId: <clientId>
